@@ -1,11 +1,12 @@
 #include "renderer.hpp"
 #include "linkedlistitem.hpp"
-#include "lineitem.hpp"
 #include "linkedlisthandler.hpp"
 #include "doublelinkedlisthandler.hpp"
+#include "arrayhandler.hpp"
 
 #include <QGraphicsScene>
 #include <QPointer>
+#include <QGraphicsLineItem>
 
 /**
  *
@@ -26,8 +27,6 @@ void render(
     QPointer<LinkedListItem> lastItem;
 
     for (
-        /* force to unsigned integer in order to
-           be compared wih length that is this type */
         unsigned int index = 0;
         index < length;
         index += 1
@@ -47,12 +46,11 @@ void render(
 
         if (not lastItem.isNull())
         {
-            LineItem* line = new LineItem(
+            QGraphicsLineItem* itemConnector = structure->getConnectorFromItems(
                 lastItem,
                 item
             );
-
-            scene->addItem(line);
+            scene->addItem(itemConnector);
         }
 
         scene->addItem(item);
@@ -76,3 +74,38 @@ template void render<DoubleLinkedListHandler>(
     QGraphicsScene* scene,
     DoubleLinkedListHandler* structure
 );
+
+/**
+ *
+ */
+void renderArray(
+    QGraphicsScene* scene,
+    const ArrayHandler* arrayHandler
+)
+{
+    scene->clear();
+
+    qreal verticalPosition {10.0};
+
+    const auto amount = arrayHandler->getAmount(); 
+
+    for (
+        unsigned int index = 0;
+        index < amount;
+        index += 1
+    ) {
+
+        const auto data = arrayHandler->getData(index);
+        LinkedListItem* item = new LinkedListItem(data);
+
+        constexpr qreal ITEMS_HORIZONTAL_POSITION {10.0};
+        constexpr qreal ITEMS_DISTANCE {25.0};
+        verticalPosition += ITEMS_DISTANCE;
+        item->setPos(
+            ITEMS_HORIZONTAL_POSITION,
+            verticalPosition
+        );
+
+        scene->addItem(item);
+    }
+}
